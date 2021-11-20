@@ -23,20 +23,15 @@ const App = (state) => {
   return `
         <header>
       <h3>${Greeting(store.user.name)}</h3>
-        ${createTabs(store.roverNames)}
-       
+        ${createTabs(store.roverNames)}   
         </header>
-        <main>
-            
+        <main>     
             <section>
             <div>
-            ${store.photos.map(img_src => (
-                `<img  src=${img_src} width=300px/>` 
-            )).join('')}
+            ${store.photos.length>0?store.photos
+              .map((img_src) => `<img  src=${img_src} width=300px/>`)
+              .join(""):`<span>about to load photos or no photo found</span>`}
         </div>
-              
-              
-            
             </section>
         </main>
         <footer></footer>
@@ -72,21 +67,17 @@ const Greeting = (name) => {
 };
 
 const createTabs = (rovernames) => {
-  return `
-        <nav class="nav-container">
+  return rovernames.length>0? `<nav class="nav-container">
         ${rovernames
           .map((rover) => {
             return `
                 <button onclick='getDataOfRover(${toStr(rover)})'>
                 ${rover}
-                </button>
-                
+                </button>              
                 `;
           })
-          .join("")}
-        
-        </nav>
-        `;
+          .join("")}       
+        </nav>`:`<div>load rovers</div>`;
 };
 
 const toStr = (str) => {
