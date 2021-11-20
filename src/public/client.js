@@ -28,9 +28,9 @@ const App = (state) => {
         <main>     
             <section>
             <div>
-            ${store.photos.length>0?store.photos
-              .map((img_src) => `<img  src=${img_src} width=300px/>`)
-              .join(""):`<span>about to load photos or no photo found</span>`}
+            ${   store.photos.length==1 ?`<span>${store.photos}</span>`:
+            store.photos.map((img_src) => `<img  src=${img_src} width=300px/>`)
+              .join("")}
         </div>
             </section>
         </main>
@@ -102,11 +102,12 @@ const dataFromRover = (nameOfRover) => {
   fetch(`http://localhost:3000/rovers/${nameOfRover.toLowerCase()}`)
     .then((res) => res.json())
     .then((rovers) => {
+      console.log([...rovers["photos"]])
       let photosOfRover = [...rovers["photos"]].map((rover) => rover.img_src);
       updateStore(store, {
         ...store,
         selectedRover: nameOfRover,
-        photos: photosOfRover,
+        photos: photosOfRover.length>0? photosOfRover:['Unable to found photos'],
       });
     });
 };
