@@ -2,6 +2,7 @@ let store = {
   user: { name: "Student" },
   apod: "",
   roverNames: [],
+  photos: [],
 };
 
 const root = document.getElementById("root");
@@ -21,15 +22,18 @@ const App = (state) => {
   let { rovers, apod } = state;
   return `
         <header>
-      
+      <h3>${Greeting(store.user.name)}</h3>
         ${createTabs(store.roverNames)}
        
         </header>
         <main>
-            ${Greeting(store.user.name)}
+            
             <section>
-                <h3>Put things on the page!</h3>
-                <p>Here is an example section.</p>
+            <div>
+            ${store.photos.map(img_src => (
+                `<img  src=${img_src} width=300px/>` 
+            )).join('')}
+        </div>
               
               
             
@@ -44,13 +48,13 @@ window.addEventListener("load", () => {
   render(root, store);
   getRovers();
 });
-const getDataOfRover=(roverNameSelected)=>{
+const getDataOfRover = (roverNameSelected) => {
   updateStore(store, {
     ...store,
     selectedRover: roverNameSelected,
   });
-  dataFromRover(roverNameSelected)
-}
+  dataFromRover(roverNameSelected);
+};
 
 // ------------------------------------------------------  COMPONENTS
 
@@ -67,34 +71,29 @@ const Greeting = (name) => {
     `;
 };
 
-const createTabs =(rovernames) =>{
-
-    return(
-        `
+const createTabs = (rovernames) => {
+  return `
         <nav class="nav-container">
-        ${rovernames.map(rover =>{
-
-            return (
-                `
+        ${rovernames
+          .map((rover) => {
+            return `
                 <button onclick='getDataOfRover(${toStr(rover)})'>
                 ${rover}
                 </button>
                 
-                `
-            )
-        }).join('')}
+                `;
+          })
+          .join("")}
         
         </nav>
-        `
-    )
-}
+        `;
+};
 
-const toStr=(str)=>{
-  return JSON.stringify(str)
-}
+const toStr = (str) => {
+  return JSON.stringify(str);
+};
 
 // ------------------------------------------------------  API CALLS
-
 
 const getRovers = () => {
   fetch(`http://localhost:3000/rovers`)
@@ -111,8 +110,12 @@ const getRovers = () => {
 const dataFromRover = (nameOfRover) => {
   fetch(`http://localhost:3000/rovers/${nameOfRover.toLowerCase()}`)
     .then((res) => res.json())
-    .then((res) => updateStore(store,{
-
-      
-    }));
+    .then((rovers) => {
+      let photosOfRover = [...rovers["photos"]].map((rover) => rover.img_src);
+      updateStore(store, {
+        ...store,
+        selectedRover: nameOfRover,
+        photos: photosOfRover,
+      });
+    });
 };
