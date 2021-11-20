@@ -3,6 +3,10 @@ let store = {
     apod: '',
     rovers: ['Curiosity', 'Opportunity', 'Spirit'],
 }
+// const ROVERS_URL = 'https://api.nasa.gov/mars-photos/api/v1/rovers';
+// const nasaApiRoversData =  fetch(`${ROVERS_URL}?api_key=eCyG8USS0a7lUJsQPFbcOyocKbkVK3bqxEH93Ypp`);
+// const nasaApiPhotosData = await fetchAsync(`${ROVERS_URL}/${name}/photos?sol=1000&page=1&api_key=${process.env.NASA_API_KEY}`);
+// nasaApiRoversData.then(res => res.json()).then(res => console.log(res))
 
 // add our markup to the page
 const root = document.getElementById('root')
@@ -20,7 +24,8 @@ const render = async (root, state) => {
 // create content
 const App = (state) => {
     let { rovers, apod } = state
-    listOfRovers()
+    // getRovers();
+    dataFromRover('Opportunity');
     return `
         <header></header>
         <main>
@@ -36,7 +41,7 @@ const App = (state) => {
                     explanation are returned. These keywords could be used as auto-generated hashtags for twitter or instagram feeds;
                     but generally help with discoverability of relevant imagery.
                 </p>
-                ${ImageOfTheDay(apod)}
+              
             
             </section>
         </main>
@@ -46,7 +51,7 @@ const App = (state) => {
 
 // listening for load event because page should load before any JS is called
 window.addEventListener('load', () => {
-    render(root, store)
+    render(root, store); 
 })
 
 // ------------------------------------------------------  COMPONENTS
@@ -66,13 +71,13 @@ const Greeting = (name) => {
 
 // Example of a pure function that renders infomation requested from the backend
 const ImageOfTheDay = (apod) => {
-
+  
     // If image does not already exist, or it is not from today -- request it again
     const today = new Date()
     const photodate = new Date(apod.date)
-    console.log(photodate.getDate(), today.getDate());
+    // console.log(photodate.getDate(), today.getDate());
 
-    console.log(photodate.getDate() === today.getDate());
+    // console.log(photodate.getDate() === today.getDate());
     if (!apod || apod.date === today.getDate() ) {
         getImageOfTheDay(store)
     }
@@ -94,17 +99,14 @@ const ImageOfTheDay = (apod) => {
 
 // ------------------------------------------------------  API CALLS
 
-// Example API call
-const getImageOfTheDay = (state) => {
-    let { apod } = state
 
-    fetch(`http://localhost:3000/apod`)
-        .then(res => res.json())
-        .then(apod => updateStore(store, { apod }))
 
-    return data
+const getRovers =()=>{
+    fetch(`http://localhost:3000/rovers`).then(res => res.json()).then(res => console.log(res))
 }
 
-const listOfRovers = ()=>{
-    fetch('http://localhost:3000/rovers').then(res => console.log(res))
+
+const dataFromRover = (nameOfRover)=>{
+   
+    fetch(`http://localhost:3000/rovers/${nameOfRover.toLowerCase()}`).then(res => res.json()).then(res => console.log(res))
 }
