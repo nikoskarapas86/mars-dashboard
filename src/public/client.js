@@ -1,8 +1,9 @@
 let store = {
   user: { name: "Student" },
   apod: "",
-  roverNames: [],
+  selectedRover:{},
   photos: [],
+  rovers: [],
 };
 
 const root = document.getElementById("root");
@@ -23,14 +24,29 @@ const App = (state) => {
   return `
         <header>
       <h3>${Greeting(store.user.name)}</h3>
-        ${createTabs(store.roverNames)}   
+        ${createTabs(store.rovers)}   
         </header>
         <main>     
+    //     name: name,
+    // landing_date: landing_date,
+    // launch_date: launch_date,
+    // status: status,
             <section>
+            <span>name : ${store.selectedRover.name}</span>
+            <span>landing date : ${store.selectedRover.landing_date}</span>
             <div>
-            ${   store.photos.length==1 ?`<span>${store.photos}</span>`:
-            store.photos.map((img_src) => `<img  src=${img_src} width=300px/>`)
-              .join("")}
+            ${
+              store.photos.length == 1
+                ? `<span>${store.photos}</span>`
+                : store.photos
+                    .map(
+                      (img_src) => `<div style="width:300px;">
+            <img  src=${img_src} width=200px/>
+            <span></span>
+            <div/>`
+                    )
+                    .join("")
+            }
         </div>
             </section>
         </main>
@@ -44,11 +60,12 @@ window.addEventListener("load", () => {
   getRovers();
 });
 const getDataOfRover = (roverNameSelected) => {
+  console.log(roverNameSelected)
   updateStore(store, {
     ...store,
     selectedRover: roverNameSelected,
   });
-  dataFromRover(roverNameSelected);
+  dataFromRover(roverNameSelected.name);
 };
 
 // ------------------------------------------------------  COMPONENTS
@@ -67,17 +84,19 @@ const Greeting = (name) => {
 };
 
 const createTabs = (rovernames) => {
-  return rovernames.length>0? `<nav class="nav-container">
+  return rovernames.length > 0
+    ? `<nav class="nav-container">
         ${rovernames
           .map((rover) => {
             return `
                 <button onclick='getDataOfRover(${toStr(rover)})'>
-                ${rover}
+                ${rover.name}
                 </button>              
                 `;
           })
           .join("")}       
-        </nav>`:`<div>load rovers</div>`;
+        </nav>`
+    : `<div>load rovers</div>`;
 };
 
 const toStr = (str) => {
@@ -90,24 +109,37 @@ const getRovers = () => {
   fetch(`http://localhost:3000/rovers`)
     .then((res) => res.json())
     .then((res) => {
-      let rovers = [...res.rovers["rovers"]].map((rover) => rover.name);
+      // let namesOfRovers = [...res.rovers["rovers"]].map((rover) => rover.name);
+      let rovers = [...res.rovers["rovers"]].map((rover) => Rover(rover));
       updateStore(store, {
         ...store,
-        roverNames: rovers,
+        // roverNames: namesOfRovers,
+        rovers: rovers,
       });
     });
+};
+
+const Rover = (rover) => {
+  const{name, landing_date, launch_date, status}=rover
+  return {
+    name: name,
+    landing_date: landing_date,
+    launch_date: launch_date,
+    status: status,
+  };
 };
 
 const dataFromRover = (nameOfRover) => {
   fetch(`http://localhost:3000/rovers/${nameOfRover.toLowerCase()}`)
     .then((res) => res.json())
     .then((rovers) => {
-      console.log([...rovers["photos"]])
+      console.log([...rovers["photos"]]);
       let photosOfRover = [...rovers["photos"]].map((rover) => rover.img_src);
       updateStore(store, {
         ...store,
-        selectedRover: nameOfRover,
-        photos: photosOfRover.length>0? photosOfRover:['Unable to found photos'],
+        // selectedRover: nameOfRover,
+        photos:
+          photosOfRover.length > 0 ? photosOfRover : ["Unable to found photos"],
       });
     });
 };
