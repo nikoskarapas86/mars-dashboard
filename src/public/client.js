@@ -1,7 +1,7 @@
 let store = {
   user: { name: "Student" },
   apod: "",
-  selectedRover:{},
+  selectedRover: {},
   photos: [],
   rovers: [],
 };
@@ -22,32 +22,16 @@ const render = async (root, state) => {
 const App = (state) => {
   let { rovers, apod } = state;
   return `
-        <header>
+        <header class="header">
       <h3>${Greeting(store.user.name)}</h3>
-        ${createTabs(store.rovers)}   
+      ${createTabs(store.rovers)}   
         </header>
         <main>     
-    //     name: name,
-    // landing_date: landing_date,
-    // launch_date: launch_date,
-    // status: status,
-            <section>
-            <span>name : ${store.selectedRover.name}</span>
-            <span>landing date : ${store.selectedRover.landing_date}</span>
-            <div>
-            ${
-              store.photos.length == 1
-                ? `<span>${store.photos}</span>`
-                : store.photos
-                    .map(
-                      (img_src) => `<div style="width:300px;">
-            <img  src=${img_src} width=200px/>
-            <span></span>
-            <div/>`
-                    )
-                    .join("")
-            }
-        </div>
+        <section>
+        ${getRoverInfo(store)}   
+        </section>
+            <section>      
+            ${getRoverPhotos(store)}
             </section>
         </main>
         <footer></footer>
@@ -60,7 +44,7 @@ window.addEventListener("load", () => {
   getRovers();
 });
 const getDataOfRover = (roverNameSelected) => {
-  console.log(roverNameSelected)
+  console.log(roverNameSelected);
   updateStore(store, {
     ...store,
     selectedRover: roverNameSelected,
@@ -77,15 +61,27 @@ const Greeting = (name) => {
             <h1>Welcome, ${name}!</h1>
         `;
   }
-
   return `
         <h1>Hello!</h1>
     `;
 };
-
+const getRoverPhotos = (store) => {
+  return store.photos.length == 1
+    ? `<span>${store.photos}</span>`
+    : store.photos
+        .map(
+          (
+            photo
+          ) => `<div style="width:100vw;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+<img  src=${photo.img_src} style="width:170px;"/>
+<span>${photo.earth_date}</span>
+<div/>`
+        )
+        .join("");
+};
 const createTabs = (rovernames) => {
   return rovernames.length > 0
-    ? `<nav class="nav-container">
+    ? `<nav>
         ${rovernames
           .map((rover) => {
             return `
@@ -103,30 +99,28 @@ const toStr = (str) => {
   return JSON.stringify(str);
 };
 
+const getRoverInfo = (store) => {
+  return !!store.selectedRover.name
+    ? `<div>
+  <span>name : ${store.selectedRover.name}</span>
+  <span>landing date : ${store.selectedRover.landing_date}</span>
+  <span>launch date : ${store.selectedRover.launch_date}</span>
+  <span>status : ${store.selectedRover.status}</span>
+  </div>`
+    : "";
+};
 // ------------------------------------------------------  API CALLS
 
 const getRovers = () => {
   fetch(`http://localhost:3000/rovers`)
     .then((res) => res.json())
     .then((res) => {
-      // let namesOfRovers = [...res.rovers["rovers"]].map((rover) => rover.name);
       let rovers = [...res.rovers["rovers"]].map((rover) => Rover(rover));
       updateStore(store, {
         ...store,
-        // roverNames: namesOfRovers,
         rovers: rovers,
       });
     });
-};
-
-const Rover = (rover) => {
-  const{name, landing_date, launch_date, status}=rover
-  return {
-    name: name,
-    landing_date: landing_date,
-    launch_date: launch_date,
-    status: status,
-  };
 };
 
 const dataFromRover = (nameOfRover) => {
@@ -134,12 +128,31 @@ const dataFromRover = (nameOfRover) => {
     .then((res) => res.json())
     .then((rovers) => {
       console.log([...rovers["photos"]]);
-      let photosOfRover = [...rovers["photos"]].map((rover) => rover.img_src);
+      let photosOfRover = [...rovers["photos"]].map((rover) =>
+        RoverPhotos(rover)
+      );
       updateStore(store, {
         ...store,
-        // selectedRover: nameOfRover,
         photos:
           photosOfRover.length > 0 ? photosOfRover : ["Unable to found photos"],
       });
     });
+};
+// ------------------------------------------------------  Factory functions
+const RoverPhotos = (rover) => {
+  const { img_src, earth_date } = rover;
+  return {
+    earth_date: earth_date,
+    img_src: img_src,
+  };
+};
+
+const Rover = (rover) => {
+  const { name, landing_date, launch_date, status } = rover;
+  return {
+    name: name,
+    landing_date: landing_date,
+    launch_date: launch_date,
+    status: status,
+  };
 };
