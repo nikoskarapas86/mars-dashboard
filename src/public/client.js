@@ -27,7 +27,7 @@ const App = (state) => {
       ${createTabs(store.rovers)}   
         </header>
         <main>     
-        <section>
+        <section class="info-section">
         ${getRoverInfo(store)}   
         </section>
             <section>      
@@ -68,16 +68,18 @@ const Greeting = (name) => {
 const getRoverPhotos = (store) => {
   return store.photos.length == 1
     ? `<span>${store.photos}</span>`
-    : store.photos
-        .map(
-          (
-            photo
-          ) => `<div style="width:100vw;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+    : `<div class="img-container">${store.photos
+      .map(
+        (
+          photo
+        ) =>
+`<figure>
 <img  src=${photo.img_src} style="width:170px;"/>
-<span>${photo.earth_date}</span>
-<div/>`
-        )
-        .join("");
+<figcaption>${photo.earth_date}</figcaption>
+</figure>
+`
+      )
+      .join("")}</div>`
 };
 const createTabs = (rovernames) => {
   return rovernames.length > 0
@@ -92,7 +94,7 @@ const createTabs = (rovernames) => {
           })
           .join("")}       
         </nav>`
-    : `<div>load rovers</div>`;
+    : `<div class="lds-hourglass"></div>`;
 };
 
 const toStr = (str) => {
